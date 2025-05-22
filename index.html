@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حضور و غیاب صوتی شاد و پرانرژی</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
+
+        body {
+            font-family: 'Lalezar', cursive, Arial, sans-serif;
+            background-color: #fff8e1; /* کرم خیلی خیلی روشن */
+            color: #424242;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 35px 40px;
+            border-radius: 30px;
+            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.1), 0 8px 15px rgba(0,0,0,0.07);
+            text-align: center;
+            width: 90%;
+            max-width: 720px;
+            position: relative;
+        }
+
+        h1 {
+            color: #d81b60; /* صورتی مات */
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        p.instructions {
+            font-size: 1.45em; /* کمی بزرگتر */
+            color: #4f4f4f;
+            margin-bottom: 30px;
+            line-height: 1.85;
+        }
+        p.instructions strong {
+            color: #00695c; /* سبزآبی تیره */
+            font-weight: bold;
+            background-color: #e0f7fa; /* پس زمینه خیلی روشن برای تاکید */
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        #speech-button {
+            background: linear-gradient(45deg, #ff8a65 0%, #ff5252 100%); /* نارنجی به قرمز */
+            color: white;
+            border: none;
+            padding: 22px 45px; /* بزرگتر */
+            font-size: 1.8em; /* بزرگتر */
+            font-family: 'Lalezar', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            margin-bottom: 25px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(255, 82, 82, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        #speech-button:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(255, 82, 82, 0.5);
+        }
+        #speech-button:active {
+            transform: translateY(-1px) scale(1.01);
+        }
+        #speech-button:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .mic-icon {
+            font-size: 1.4em;
+            margin-left: 15px;
+        }
+
+        #speech-status, #message {
+            margin-top: 20px;
+            font-size: 1.25em; /* کمی بزرگتر */
+            min-height: 28px;
+            transition: color 0.3s;
+        }
+        #speech-status { color: #1e88e5; /* آبی */ }
+        #message.success { color: #388e3c; font-weight: bold; }
+        #message.error { color: #d32f2f; font-weight: bold; }
+        #message.info { color: #f57c00; }
+
+
+        #teacher-view-button {
+            background-color: #0097a7; /* فیروزه‌ای تیره تر */
+            color: white;
+            border: none;
+            padding: 16px 32px; /* بزرگتر */
+            font-size: 1.6em; /* بزرگتر */
+            font-family: 'Lalezar', cursive;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 40px;
+        }
+        #teacher-view-button:hover {
+            background-color: #00796b;
+            transform: scale(1.05);
+        }
+
+        #teacher-area {
+            margin-top: 40px;
+            background-color: #e8f5e9;
+            padding: 30px;
+            border-radius: 25px;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h2 {
+            color: #00695c;
+            font-size: 2.3em; /* بزرگتر */
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            border-bottom: 1px solid #dcedc8; /* سبز خیلی خیلی روشن */
+            padding: 16px 12px; /* پدینگ بیشتر */
+            text-align: center;
+            font-size: 1.15em; /* کمی بزرگتر */
+        }
+        th {
+            background-color: #4caf50; /* سبز اصلی */
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: bold;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:nth-child(even) td {
+            background-color: #f1f8e9;
+        }
+        td.mood-normal { background-color: #fff9c4 !important; /* زرد روشن برای عادی */ }
+        td.mood-good { background-color: #c8e6c9 !important; }
+        td.mood-bad { background-color: #ffcdd2 !important; }
+        td.mood-great { background-color: #b3e5fc !important; }
+        td.mood-unknown { background-color: #eeeeee !important; /* خاکستری روشن برای ناشناخته */ }
+        .name-verified { color: #2e7d32; font-weight: bold; }
+        .name-unverified { color: #e65100; /* نارنجی تیره */ }
+
+
+        .popup-checkmark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: rgba(39, 174, 96, 0.92); /* سبز با شفافیت */
+            color: white;
+            padding: 35px 45px; /* بزرگتر */
+            border-radius: 25px; /* گردتر */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.35s ease-out;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+        }
+        .popup-checkmark.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        .popup-checkmark svg {
+            width: 90px; /* بزرگتر */
+            height: 90px; /* بزرگتر */
+            margin-bottom: 18px;
+        }
+        .popup-checkmark .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3.5; /* کمی ضخیم تر */
+            stroke-miterlimit: 10;
+            stroke: white;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.3s forwards;
+        }
+        .popup-checkmark .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke-width: 4.5; /* ضخیم تر */
+            stroke: white;
+            fill: none;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.7s forwards;
+        }
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        .popup-checkmark p {
+            font-size: 1.7em; /* بزرگتر */
+            margin: 0;
+            font-family: 'Lalezar', cursive;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>حضور غیاب صوتی کلاس شادمون!</h1>
+        <p class="instructions">
+            دکمه "شروع صحبت" رو فشار بده و با صدای رسا بگو: <br>
+            <strong>"سلام، [اسم قشنگت] هستم و امروز حالم [عادیه/خوبه/بده/عالیه]"</strong>
+        </p>
+
+        <button id="speech-button" onclick="startSpeechRecognition()">
+            <span class="mic-icon">🎤</span> شروع صحبت
+        </button>
+        <div id="speech-status"></div>
+        <div id="message"></div>
+
+        <!-- دکمه تست صدا (اختیاری برای خطایابی) -->
+        <!-- <button onclick="document.getElementById('success-sound').play()">تست صدا</button> -->
+
+        <button id="teacher-view-button" onclick="showTeacherView()">بازدید معلم</button>
+
+        <div id="teacher-area">
+            <h2>لیست حضور و غیاب امروز</h2>
+            <table id="attendance-table">
+                <thead>
+                    <tr>
+                        <th>ردیف</th>
+                        <th>دانش‌آموز (لیست)</th>
+                        <th>گفته شده</th>
+                        <th>حال (گفته)</th>
+                        <th>حال (طبقه‌بندی)</th>
+                        <th>ایموجی</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="popup-checkmark" id="success-popup">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <p>عالی بود! ثبت شد!</p>
+    </div>
+
+    <audio id="success-sound" src="success.mp3" preload="auto"></audio>
+    <!-- <audio id="success-sound" src="https://actions.google.com/sounds/v1/alarms/dinner_bell_triangle.ogg" preload="auto"></audio> -->
+
+
+    <script>
+        const classList = [
+            "سارا محمدی", "علی رضایی", "فاطمه احمدی", "محمد حسینی",
+            "زهرا کریمی", "حسین اکبری", "مریم جعفری", "امیر مرادی",
+            "نیلوفر قاسمی", "رضا محمودی", "آوا تهرانی", "کیان پارسا" // چند نام دیگر
+        ].map(name => name.trim().replace(/ی/g, 'ي').replace(/ک/g, 'ك')); // نرمال سازی اولیه در خود لیست
+
+        let attendanceList = [];
+        let studentCounter = 0;
+
+        const speechButton = document.getElementById('speech-button');
+        const speechStatusEl = document.getElementById('speech-status');
+        const messageEl = document.getElementById('message');
+        const successPopup = document.getElementById('success-popup');
+        const successSound = document.getElementById('success-sound');
+
+        // اضافه کردن "عادیه" به moodMap
+        const moodMap = {
+            "عادیه": { normalized: "عادیه", emoji: "😐" }, "عادی ام": { normalized: "عادیه", emoji: "😐" }, "عادی": { normalized: "عادیه", emoji: "😐" },
+            "خوبه": { normalized: "خوبه", emoji: "😊" }, "خوبم": { normalized: "خوبه", emoji: "😊" }, "خوب": { normalized: "خوبه", emoji: "😊" },
+            "بده": { normalized: "بده", emoji: "😟" }, "بدم": { normalized: "بده", emoji: "😟" }, "بد": { normalized: "بده", emoji: "😟" },
+            "عالیه": { normalized: "عالیه", emoji: "😃" }, "عالیم": { normalized: "عالیه", emoji: "😃" }, "عالی ام": { normalized: "عالیه", emoji: "😃" }, "عالی": { normalized: "عالیه", emoji: "😃" }
+        };
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'fa-IR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                speechStatusEl.textContent = "گوشم با شماست قهرمان...";
+                speechButton.disabled = true;
+                speechButton.innerHTML = '<span class="mic-icon">🎤</span> در حال شنیدن...';
+                messageEl.textContent = "";
+                messageEl.className = '';
+            };
+
+            recognition.onspeechend = () => {
+                speechStatusEl.textContent = "شنیدم! دارم بررسی می‌کنم...";
+                // recognition.stop(); // معمولا خودکار متوقف می شود، اما اگر نه، این را فعال کنید
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                speechStatusEl.textContent = `گفتی: "${transcript}"`;
+                processSpeech(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                let errorMsg = "اوه! یه مشکلی پیش اومده!";
+                if (event.error === 'no-speech') errorMsg = "مثل اینکه صدایی نشنیدم! دوباره دکمه رو بزن و صحبت کن.";
+                else if (event.error === 'audio-capture') errorMsg = "نتونستم صدات رو از میکروفون بگیرم. مطمئنی میکروفونت وصله و اجازه دادی؟";
+                else if (event.error === 'not-allowed') errorMsg = "اجازه ندادی از میکروفون استفاده کنم. برای شنیدن صدات به اجازه‌ات نیاز دارم.";
+                else errorMsg = `خطا در تشخیص: ${event.error}`;
+                
+                messageEl.textContent = errorMsg;
+                messageEl.className = 'error';
+                speechStatusEl.textContent = ""; // پاک کردن وضعیت قبلی
+            };
+            
+            recognition.onend = () => {
+                speechButton.disabled = false;
+                speechButton.innerHTML = '<span class="mic-icon">🎤</span> شروع صحبت';
+                // اطمینان از اینکه speechStatusEl در انتها یک پیام پیشفرض ندارد تا با پیام خطا/موفقیت تداخل نکند
+                if (speechStatusEl.textContent.includes("شنیدم") || speechStatusEl.textContent.includes("گوشم")) {
+                    speechStatusEl.textContent = "برای صحبت دوباره، دکمه رو بزن.";
+                }
+            };
+
+        } else {
+            speechButton.disabled = true;
+            speechButton.textContent = "مرورگر شما پشتیبانی نمی‌کند";
+            speechStatusEl.textContent = "متاسفانه مرورگر شما از تشخیص گفتار پشتیبانی نمی‌کنه. لطفا از گوگل کروم استفاده کنید.";
+            speechStatusEl.style.color = "red";
+        }
+
+        function startSpeechRecognition() {
+            // قبل از شروع، اگر پیامی از قبل وجود دارد پاک شود
+            messageEl.textContent = "";
+            messageEl.className = '';
+            speechStatusEl.textContent = ""; // پاک کردن وضعیت قبلی
+
+            // تلاش برای فعال کردن context صوتی (گاهی برای iOS لازم است)
+            if (successSound && successSound.paused) {
+                successSound.play().then(() => successSound.pause()).catch(()=>{});
+            }
+
+            if (recognition) {
+                try {
+                    recognition.start();
+                } catch(e) {
+                    console.error("خطا در شروع تشخیص:", e);
+                    messageEl.textContent = "یک لحظه صبر کن و دوباره دکمه رو بزن.";
+                    messageEl.className = 'error';
+                    speechButton.disabled = false; 
+                    speechButton.innerHTML = '<span class="mic-icon">🎤</span> شروع صحبت';
+                }
+            }
+        }
+
+        function playSuccessFeedback() {
+            if (successSound) {
+                successSound.currentTime = 0;
+                const playPromise = successSound.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // پخش موفقیت آمیز
+                    }).catch(error => {
+                        console.warn("خطا در پخش صدا: ", error);
+                        // ممکن است کاربر هنوز با صفحه تعامل نکرده باشد
+                        // یا مرورگر اجازه پخش خودکار را مسدود کرده باشد.
+                        // در این حالت، فقط پاپ‌آپ نمایش داده می‌شود.
+                    });
+                }
+            }
+
+            successPopup.classList.add('show');
+            setTimeout(() => {
+                successPopup.classList.remove('show');
+            }, 2200); // زمان نمایش پاپ آپ
+        }
+
+        function processSpeech(transcript) {
+            // Regex به‌روز شده برای جمله: "سلام، [نام] هستم و امروز حالم [حال]"
+            const mainRegex = /سلام(?:،|\s،)?\s*(.*?)\s+هستم\s+(?:و\s*)?(?:امروز\s*)?حالم\s+(.*)/i;
+            // (?:،|\s،)? یعنی کاما یا فاصله و کاما اختیاری است
+            // (?:و\s*)? (?:امروز\s*)? کلمات "و" و "امروز" اختیاری هستند
+
+            let studentNameFromSpeech = "";
+            let statedMood = "";
+            let match = transcript.match(mainRegex);
+
+            if (match && match[1] && match[2]) {
+                studentNameFromSpeech = match[1].trim();
+                statedMood = match[2].trim().replace(/\.$/, ''); // حذف نقطه پایانی احتمالی
+            } else {
+                // تلاش برای الگوهای ساده‌تر
+                const simplerRegex1 = /من\s+(.*?)\s+(?:هستم\s*)?(?:و\s*)?(?:امروز\s*)?حالم\s+(.*)/i;
+                match = transcript.match(simplerRegex1);
+                if (match && match[1] && match[2]) {
+                    studentNameFromSpeech = match[1].trim();
+                    statedMood = match[2].trim().replace(/\.$/, '');
+                    messageEl.textContent = `جمله‌ات کمی فرق داشت ولی متوجه شدم! `;
+                    messageEl.className = 'info';
+                } else {
+                    const simplerRegex2 = /^(.*?)\s+حالم\s+(.*)/i; // مثلا "سارا حالم خوبه"
+                    match = transcript.match(simplerRegex2);
+                     if (match && match[1] && match[2]) {
+                        studentNameFromSpeech = match[1].trim();
+                        statedMood = match[2].trim().replace(/\.$/, '');
+                        messageEl.textContent = `جمله‌ات خیلی خلاصه بود ولی بازم فهمیدم! `;
+                        messageEl.className = 'info';
+                    } else {
+                        messageEl.textContent = `متاسفانه نتونستم اسمت و حالت رو از جمله‌ای که گفتی پیدا کنم. لطفا دقیق بگو: "سلام، [اسمت] هستم و امروز حالم [عادیه/خوبه/بده/عالیه]"`;
+                        messageEl.className = 'error';
+                        setTimeout(() => { if (messageEl.className === 'error' && messageEl.textContent.startsWith("متاسفانه نتونستم")) messageEl.textContent = ""; }, 7000);
+                        return;
+                    }
+                }
+            }
+            
+            const normalizedSpokenName = studentNameFromSpeech.replace(/ی/g, 'ي').replace(/ک/g, 'ك');
+            const foundStudent = classList.find(nameInList => nameInList === normalizedSpokenName);
+
+            let officialName = studentNameFromSpeech;
+            let nameVerified = false;
+
+            const currentInfoMessage = messageEl.textContent.includes("ولی") ? messageEl.textContent : "";
+
+            if (foundStudent) {
+                officialName = foundStudent;
+                nameVerified = true;
+                messageEl.textContent = currentInfoMessage + `شناختمت ${officialName.replace(/ي/g, 'ی').replace(/ك/g, 'ک')}! `; // نمایش با ی و ک فارسی
+                messageEl.className = 'info';
+            } else {
+                messageEl.textContent = currentInfoMessage + `اسم "${studentNameFromSpeech}" توی لیست کلاس نبود، ولی ثبتش می‌کنم. `;
+                messageEl.className = 'info';
+            }
+
+            // نرمال‌سازی حال و پیدا کردن ایموجی
+            let normalizedMood = "ناشناخته";
+            let moodEmoji = "🤔";
+            const moodKey = statedMood.toLowerCase();
+            
+            // جستجوی دقیق در moodMap
+            if (moodMap[moodKey]) {
+                normalizedMood = moodMap[moodKey].normalized;
+                moodEmoji = moodMap[moodKey].emoji;
+            } else {
+                // جستجوی شامل شونده (includes) اگر دقیق پیدا نشد
+                for (const key in moodMap) {
+                    if (moodKey.includes(key) || moodKey.includes(moodMap[key].normalized)) { // اضافه کردن چک با normalized
+                        normalizedMood = moodMap[key].normalized;
+                        moodEmoji = moodMap[key].emoji;
+                        break;
+                    }
+                }
+            }
+
+
+            const existingStudentIndex = attendanceList.findIndex(s => s.officialName === officialName);
+            if (existingStudentIndex > -1) {
+                attendanceList[existingStudentIndex].statedMood = statedMood;
+                attendanceList[existingStudentIndex].mood = normalizedMood;
+                attendanceList[existingStudentIndex].emoji = moodEmoji;
+                attendanceList[existingStudentIndex].spokenName = studentNameFromSpeech;
+                attendanceList[existingStudentIndex].nameVerified = nameVerified;
+                messageEl.textContent += `حضورت قبلا ثبت شده بود، حالت به‌روز شد: ${statedMood} ${moodEmoji}`;
+            } else {
+                studentCounter++;
+                attendanceList.push({ 
+                    id: studentCounter, 
+                    officialName: officialName, 
+                    spokenName: studentNameFromSpeech, 
+                    nameVerified: nameVerified, 
+                    statedMood: statedMood,
+                    mood: normalizedMood, 
+                    emoji: moodEmoji 
+                });
+                messageEl.textContent += (messageEl.textContent.includes("شناختمت") || messageEl.textContent.includes("نبود") ? "" : `آفرین ${officialName.replace(/ي/g, 'ی').replace(/ك/g, 'ک')}! `) + `حضورت با حال ${statedMood} ${moodEmoji} ثبت شد.`;
+            }
+            
+            messageEl.className = 'success';
+            playSuccessFeedback();
+
+            if (document.getElementById('teacher-area').style.display === 'block') {
+                renderTable();
+            }
+            setTimeout(() => {
+                // فقط پیام موفقیت یا اطلاعاتی که مربوط به ثبت است را پاک کن
+                if (messageEl.className === 'success' || (messageEl.className === 'info' && messageEl.textContent.includes("ثبت شد"))) {
+                     messageEl.textContent = "";
+                }
+                if (speechStatusEl.textContent.includes("گفتی")) {
+                     speechStatusEl.textContent = "برای صحبت دوباره، دکمه رو بزن.";
+                }
+            }, 5500);
+        }
+
+        function showTeacherView() {
+            const teacherArea = document.getElementById('teacher-area');
+            const teacherButton = document.getElementById('teacher-view-button');
+            if (teacherArea.style.display === 'none' || teacherArea.style.display === '') {
+                teacherArea.style.display = 'block';
+                teacherButton.textContent = "بستن بازدید معلم";
+                renderTable();
+            } else {
+                teacherArea.style.display = 'none';
+                teacherButton.textContent = "بازدید معلم";
+            }
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('attendance-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; 
+
+            if (attendanceList.length === 0) {
+                const row = tableBody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 6;
+                cell.textContent = "هنوز هیچ دانش‌آموزی حضور نزده.";
+                cell.style.textAlign = "center";
+                return;
+            }
+
+            attendanceList.sort((a, b) => a.id - b.id);
+
+            attendanceList.forEach((student) => {
+                const row = tableBody.insertRow();
+                
+                row.insertCell().textContent = student.id;
+                
+                const officialNameCell = row.insertCell();
+                officialNameCell.textContent = student.officialName.replace(/ي/g, 'ی').replace(/ك/g, 'ک'); // نمایش با ی و ک فارسی
+                officialNameCell.classList.add(student.nameVerified ? 'name-verified' : 'name-unverified');
+                if (!student.nameVerified) officialNameCell.title = "این نام در لیست اولیه کلاس نبود.";
+                
+                row.insertCell().textContent = student.spokenName;
+                row.insertCell().textContent = student.statedMood;
+                
+                const moodCell = row.insertCell();
+                moodCell.textContent = student.mood;
+                
+                row.insertCell().textContent = student.emoji;
+
+                if (student.mood === "عادیه") moodCell.classList.add('mood-normal');
+                else if (student.mood === "خوبه") moodCell.classList.add('mood-good');
+                else if (student.mood === "بده") moodCell.classList.add('mood-bad');
+                else if (student.mood === "عالیه") moodCell.classList.add('mood-great');
+                else moodCell.classList.add('mood-unknown');
+            });
+        }
+    </script>
+</body>
+</html>
